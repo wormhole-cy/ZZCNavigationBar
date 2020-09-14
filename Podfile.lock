@@ -1,0 +1,20 @@
+PODS:
+  - Aspects (1.4.1)
+  - Masonry (1.1.0)
+
+DEPENDENCIES:
+  - Aspects
+  - Masonry
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Aspects
+    - Masonry
+
+SPEC CHECKSUMS:
+  Aspects: 7595ba96a6727a58ebcbfc954497fc5d2fdde546
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+
+PODFILE CHECKSUM: 49c832b9342a6fc5fd356521703e46ddfaa7e452
+
+COCOAPODS: 1.7.5
