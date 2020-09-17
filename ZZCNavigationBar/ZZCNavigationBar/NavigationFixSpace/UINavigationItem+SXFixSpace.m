@@ -23,47 +23,45 @@ typedef NS_ENUM(NSInteger, SXBarViewPosition) {
 
 @implementation BarView
 
+- (void)updateConstraints{
+    [super updateConstraints];
+    
+    
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
+//    self.backgroundColor = [UIColor brownColor];
+    
     if (self.applied || [[[UIDevice currentDevice] systemVersion] floatValue]  < 11) return;
+        
     UIView *view = self;
-    while (![view isKindOfClass:UINavigationBar.class] && view.superview) {
+    while (view && ![view isKindOfClass:UINavigationBar.class]) {
         view = [view superview];
-        if (@available(iOS 9.0, *)) {
-            if ([view isKindOfClass:UIStackView.class] && view.superview) {
-                if (self.position == SXBarViewPositionLeft) {
-                    for (NSLayoutConstraint *constraint in view.superview.constraints) {
-                        if (([constraint.firstItem isKindOfClass:UILayoutGuide.class] &&
-                             constraint.firstAttribute == NSLayoutAttributeTrailing)) {
-                            [view.superview removeConstraint:constraint];
-                        }
-                    }
-                    [view.superview addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:view.superview  attribute:NSLayoutAttributeLeading multiplier:1.0 constant:-6]];
-                } else if (self.position == SXBarViewPositionRight) {
-                    for (NSLayoutConstraint *constraint in view.superview.constraints) {
-                        if (([constraint.firstItem isKindOfClass:UILayoutGuide.class] &&
-                             constraint.firstAttribute == NSLayoutAttributeLeading)) {
-                            [view.superview removeConstraint:constraint];
-                        }
-                    }
-                    [view.superview addConstraint:[NSLayoutConstraint constraintWithItem:view
-                                                                               attribute:NSLayoutAttributeTrailing
-                                                                               relatedBy:NSLayoutRelationEqual
-                                                                                  toItem:view.superview
-                                                                               attribute:NSLayoutAttributeTrailing
-                                                                              multiplier:1.0
-                                                                                constant:0]];
-                }
-                if (@available(iOS 13.0, *)) {
-                    
-                } else {
-                    self.applied = YES;
-                }
-                break;
-            }
-        } else {
-            // Fallback on earlier versions
+        if (!view.superview) {
+            break;
         }
+        if (![view isKindOfClass:UIStackView.class]) {
+            continue;
+        }
+        
+        for (NSLayoutConstraint *constraint in view.superview.constraints) {
+            if (![constraint.firstItem isKindOfClass:UILayoutGuide.class]) {
+                continue;
+            }
+            
+            if (constraint.constant == 0) {
+                continue;
+            }
+            
+            if (constraint.firstAttribute == NSLayoutAttributeLeft || constraint.firstAttribute == NSLayoutAttributeLeading || constraint.firstAttribute == NSLayoutAttributeRight || constraint.firstAttribute == NSLayoutAttributeTrailing || constraint.secondAttribute == NSLayoutAttributeLeft || constraint.secondAttribute == NSLayoutAttributeLeading || constraint.secondAttribute == NSLayoutAttributeRight || constraint.secondAttribute == NSLayoutAttributeTrailing) {
+                constraint.constant = 0;
+            }
+//            NSLog(@"%@", constraint);
+        }
+        
+//        self.applied = YES;
+        
     }
 }
 

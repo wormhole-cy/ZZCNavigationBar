@@ -47,6 +47,8 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
 
 @property (nonatomic, assign) BOOL vs_viewDidAppeared;
 
+@property (nonatomic, strong) UIView *vs_customNavigationBar;
+
 @end
 
 @implementation UIViewController (CyNavigationBar)
@@ -223,6 +225,14 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
 
 - (void)setVc_markNvcConfig:(NSMutableDictionary *)vc_markNvcConfig{
     objc_setAssociatedObject(self, @selector(vc_markNvcConfig), vc_markNvcConfig, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)setVs_customNavigationBar:(UIView *)vs_customNavigationBar{
+    objc_setAssociatedObject(self, @selector(vs_customNavigationBar), vs_customNavigationBar, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (UIView *)vs_customNavigationBar{
+    return objc_getAssociatedObject(self, @selector(vs_customNavigationBar));
 }
 
 + (void)load {
@@ -428,7 +438,7 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
     [contentView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(@0);
     }];
-    
+    self.vs_customNavigationBar = bar;
     objc_setAssociatedObject(self, @selector(navigationBar), bar, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
@@ -536,6 +546,7 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
 
 - (void)cy_updateNavigationBarItems
 {
+    self.vs_customNavigationBar.hidden = ![self cy_isCustomNavigationBar];
     if ([self cy_isCustomNavigationBar])
     {
         self.navigationBar.hidden = self.navigationConfig.hideNavigationBar;
@@ -544,9 +555,20 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
         [self cy_updateLeftTopBarButtonItems];
         [self cy_setRightBarButtonItem:self.navigationConfig.rightTopButtonItems isTopSuspending:true];
     }
+    
     [self cy_updateLeftBarButtonItems];
     [self cy_updateRightBarButtonItems];
     [self cy_updateTitleItem];
+    if (!self.navigationConfig.customNavigationBar) {
+        //移除顶部按钮
+        [self.navigationConfig.backTopButtonItem.customView.superview removeFromSuperview];
+        [self.navigationConfig.leftTopButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [obj.customView.superview removeFromSuperview];
+        }];
+        [self.navigationConfig.rightTopButtonItems enumerateObjectsUsingBlock:^(UIBarButtonItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [obj.customView.superview removeFromSuperview];
+        }];
+    }
 }
 
 - (void)cy_updateLeftBarButtonItems
@@ -661,7 +683,7 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
         if ([self cy_isCustomNavigationBar])
         {
             [self.vs_titleLabel.superview removeFromSuperview];
-            item.titleView.applied = YES;
+//            [self cy_navigationBarContentView].backgroundColor = [UIColor purpleColor];
             [[self cy_navigationBarContentView] addSubview:item.titleView];
             if (item.isHorizontalCenter)
             {
@@ -672,12 +694,6 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
                     make.height.equalTo(@(navigationBarHeight()));
                     make.bottom.equalTo(@0);
                 }];
-                
-                [item.customView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                    make.center.equalTo(@0);
-                    make.top.bottom.equalTo(@0);
-                    make.width.equalTo(@([UIScreen mainScreen].bounds.size.width - 2 * maxW));
-                }];
             }else
             {
                 [item.titleView mas_remakeConstraints:^(MASConstraintMaker *make) {
@@ -686,13 +702,8 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
                     make.height.equalTo(@(navigationBarHeight()));
                     make.bottom.equalTo(@0);
                 }];
-                
-                [item.customView mas_remakeConstraints:^(MASConstraintMaker *make) {
-                    make.center.equalTo(@0);
-                    make.top.bottom.equalTo(@0);
-                    make.width.equalTo(@([UIScreen mainScreen].bounds.size.width - self.vs_leftBarWidth - self.vs_rightBarWidth));
-                }];
             }
+            item.titleView.markFrame = CGRectZero;
         }else
         {
             self.navigationItem.titleView = item.titleView;
@@ -706,15 +717,16 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
                 
             }else
             {
-                rect = CGRectMake(self.vs_leftBarWidth, 0, CGRectGetWidth(self.navigationController.view.bounds) - self.vs_leftBarWidth - self.vs_rightBarWidth, CGRectGetHeight(self.navigationController.view.bounds));
+                rect = CGRectMake(self.vs_leftBarWidth, 0, CGRectGetWidth(self.navigationController.view.bounds) - self.vs_leftBarWidth - self.vs_rightBarWidth, navigationBarHeight());
             }
             
             item.titleView.markFrame = rect;
-            
-            self.navigationItem.titleView.frame = rect;
             if ([[[UIDevice currentDevice] systemVersion] floatValue] < 11)
             {
+                self.navigationItem.titleView.frame = rect;
                 self.navigationItem.titleView.translatesAutoresizingMaskIntoConstraints = YES;
+            }else{
+                self.navigationItem.titleView.translatesAutoresizingMaskIntoConstraints = NO;
             }
 
         }
@@ -739,7 +751,7 @@ UIKIT_STATIC_INLINE CGFloat navigationButtonSpace()
             [leftBarButtonItems.firstObject.customView.superview removeFromSuperview];
         }
         UIView *barView = [[UIView alloc] init];
-        //        barView.backgroundColor = [UIColor purpleColor];
+//                barView.backgroundColor = [UIColor purpleColor];
         CGFloat w = navigationButtonEdge();
         UIView *tmpView = nil;
         

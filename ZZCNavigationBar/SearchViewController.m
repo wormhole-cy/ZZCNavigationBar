@@ -12,6 +12,7 @@
 #import "UIViewController+CyNavigationBar.h"
 #import "LXSearchBar.h"
 #import <Masonry/Masonry.h>
+#import "ZZCNavigationUIFactory.h"
 @interface SearchViewController ()
 
 @end
@@ -25,10 +26,26 @@
     // Do any additional setup after loading the view.
     
 
-    self.navigationConfig.title = @"1234";
-//    self.navigationConfig.customNavigationBar = YES;
-//    self.navigationConfig.hideNavigationBar = YES;
+//    self.navigationConfig.title = @"1234";
     
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.font = [UIFont systemFontOfSize:16];
+    titleLabel.textColor = [UIColor blackColor];
+    titleLabel.text =@"1234";
+    titleLabel.backgroundColor = [UIColor redColor];
+    CyNavigationTitleItem *titleItem = [[CyNavigationTitleItem alloc] initWithCustomView:titleLabel];
+    titleItem.isHorizontalCenter = NO;
+    self.navigationConfig.titleItem = titleItem;
+//    titleLabel.frame = CGRectMake(0, 0, 100, 44);
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(@0);
+    }];
+    
+    self.navigationConfig.customNavigationBar = YES;
+//    self.navigationConfig.hideNavigationBar = YES;
+//    self.navigationConfig.rightBarButtonItems = @[[ZZCNavigationUIFactory barButtonItemBackWhiteGrayBgStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
+//        
+//    }]];
     UIButton *test = [UIButton buttonWithType:UIButtonTypeCustom];
     [test setTitle:@"改变title" forState:UIControlStateNormal];
     test.titleLabel.font = [UIFont systemFontOfSize:10];

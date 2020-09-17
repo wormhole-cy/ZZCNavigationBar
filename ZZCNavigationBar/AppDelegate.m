@@ -25,7 +25,7 @@
 //    }
 
     ZZCNavigationButtonImageSize = CGSizeMake(24, 24);
-    ZZCNavigationButtonContentEdge = 16;
+    ZZCNavigationButtonContentEdge = 10;
     ZZCNavigationButtonContentSpace = 16;
 //    ZZCNavigationBarBottomLineColor = [UIColor redColor];
 //    ZZCNavigationBarTintColor = [UIColor blueColor];

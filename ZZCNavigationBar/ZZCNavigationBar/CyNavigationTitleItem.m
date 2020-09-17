@@ -21,7 +21,6 @@
         {
             CyNavigationTitleView *aView = [[CyNavigationTitleView alloc] init];
             [aView addSubview:customView];
-            
             _titleView = aView;
         }
     }
@@ -62,64 +61,69 @@
 
 @implementation CyNavigationTitleView
 
-- (void)setMarkFrame:(CGRect)markFrame
-{
-    _markFrame = markFrame;
-    if (self.applied && self.superview && [[[UIDevice currentDevice] systemVersion] floatValue]  >= 11)
-    {
-        @try {
-            [self mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.left.equalTo(@(self.markFrame.origin.x));
-                make.top.equalTo(@(self.markFrame.origin.y));
-                make.width.equalTo(@(self.markFrame.size.width));
-                make.height.equalTo(@(self.markFrame.size.height));
-            }];
-        } @catch (NSException *exception) {
-            
-        } @finally {
-            
-        }
-    }
-}
-
-- (void)setFrame:(CGRect)frame
-{
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 11 && self.markFrame.size.width > 0)
-    {
+- (void)setFrame:(CGRect)frame{
+    if (self.markFrame.size.width > 0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 11) {
         [super setFrame:self.markFrame];
-    }else
-    {
-        [super setFrame:frame];
+        return;
     }
+    [super setFrame:frame];
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
     
-    if (self.applied || [[[UIDevice currentDevice] systemVersion] floatValue]  < 11)
-    {
+//    self.backgroundColor = [UIColor greenColor];
+    if (self.markFrame.size.width == 0) return;
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 11) {
+        
+    }else{
+        [self setupLayoutForLargeIos11];
+    }
+}
+
+- (void)setupLayoutForLargeIos11{
+    UIView *view = self;
+    if ([self.superview.superview.superview isKindOfClass:[UINavigationBar class]]) {
+        view = self.superview;
+    }
+    if (self.applied && CGRectEqualToRect(view.frame, self.markFrame)) {
         return;
     }
+//    NSLog(@"%@", view);
+//    view.backgroundColor = [UIColor blueColor];
+    for (NSLayoutConstraint *constraint in view.superview.constraints){
+        if (constraint.firstItem == view) {
+//            NSLog(@"%@", constraint);
+            [view.superview removeConstraint:constraint];
+        }
+    }
+
+    NSLayoutConstraint *left = [NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:view.superview attribute:NSLayoutAttributeLeft multiplier:1 constant:self.markFrame.origin.x];
+    NSLayoutConstraint *top = [NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:view.superview attribute:NSLayoutAttributeTop multiplier:1 constant:self.markFrame.origin.y];
+    [view.superview addConstraints:@[left, top]];
+
+    NSLayoutConstraint *width = [NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeWidth multiplier:1 constant:self.markFrame.size.width];
+    NSLayoutConstraint *height = [NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.markFrame.size.height];
+    [view addConstraints:@[width, height]];
     
-    if (self.superview)
-    {
-        @try {
-            self.applied = YES;
-            
-            [self mas_remakeConstraints:^(MASConstraintMaker *make) {
-                make.left.equalTo(@(self.markFrame.origin.x));
-                make.top.equalTo(@(self.markFrame.origin.y));
-                make.width.equalTo(@(self.markFrame.size.width));
-                make.height.equalTo(@(self.markFrame.size.height));
-            }];
-        } @catch (NSException *exception) {
-            
-        } @finally {
-            
+    if (self != view) {
+        for (NSLayoutConstraint *constraint in self.superview.constraints){
+            if (constraint.firstItem == self) {
+//                NSLog(@"%@", constraint);
+                [self.superview removeConstraint:constraint];
+            }
         }
         
+        left = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.superview attribute:NSLayoutAttributeLeft multiplier:1 constant:0];
+        top = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.superview attribute:NSLayoutAttributeTop multiplier:1 constant:0];
+        width = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeWidth multiplier:1 constant:self.markFrame.size.width];
+        height = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.markFrame.size.height];
+        [self.superview addConstraints:@[left, top]];
+        [self addConstraints:@[width, height]];
     }
+    self.applied = YES;
 }
 
 @end

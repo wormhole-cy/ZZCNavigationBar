@@ -39,25 +39,25 @@
     self.view.backgroundColor = [UIColor orangeColor];
 //    self.viewControllerConfig.statusBarStyle = UIStatusBarStyleLightContent;
 
-    self.title = @"我的美国之旅我的美国之旅我的美国之旅我的美国之旅我的美国之旅我的美国之旅我的美国之旅";
+    self.title = @"我的美国之旅";
 //    self.navigationConfig.customNavigationBar = YES;
 //    self.navigationBar.hidden = YES;
 
     self.navigationConfig.backgroundColor = [UIColor redColor];
     if (self.navigationController.viewControllers.count % 2) {
+        
+//        self.navigationConfig.leftBarButtonItems = @[[ZZCNavigationUIFactory barButtonItemBackStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
+//            
+//        }]];
         self.navigationConfig.leftBarButtonItems = @[[ZZCNavigationUIFactory barButtonItemBackStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
+
         }], [ZZCNavigationUIFactory barButtonItemBackWhiteStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
+
         }], [ZZCNavigationUIFactory barButtonItemBackWhiteGrayBgStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
+
         }]];
         self.navigationConfig.rightBarButtonItems = @[[ZZCNavigationUIFactory barButtonItemMoreStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
-        }], [ZZCNavigationUIFactory barButtonItemMoreRedDotStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
-        }], [ZZCNavigationUIFactory barButtonItemMoreWhiteStyleWithClickedBlock:^(UIButton * _Nonnull sender) {
-            
+
         }]];
     }else
     {
